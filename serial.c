@@ -22,8 +22,7 @@ static int serial_putchar(char c, FILE *stream);
 FILE mystdout = FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
 #endif
 
-void serial_init(uint32_t baud)
-{
+void serial_init(uint32_t baud) {
 	serial_set_baudrate(baud);
 
 	serial_fifo_init(&rx_fifo);
@@ -31,16 +30,15 @@ void serial_init(uint32_t baud)
 	tx_sending = 0;
 
 #ifndef SERIAL_NO_PRINTF
-	stdout = &mystdout;
+	stdout= &mystdout;
 #endif
 }
 
-void serial_set_baudrate(uint32_t baud)
-{
+void serial_set_baudrate(uint32_t baud) {
 	uint16_t baud_setting;
 	uint8_t use_u2x = 1;
 
-try_again:
+	try_again:
 
 	if (use_u2x) {
 		UCSR0A = _BV(U2X0);
@@ -64,20 +62,18 @@ try_again:
 #endif
 }
 
-
-void serial_write_hex(uint8_t v)
-{
+void serial_write_hex(uint8_t v) {
 	unsigned char temp;
 
 	temp = v >> 4;
-	if(temp > 9)
+	if (temp > 9)
 		temp += 55;
 	else
 		temp += '0';
 	serial_write(temp);
 
 	temp = v & 0x0F;
-	if(temp > 9)
+	if (temp > 9)
 		temp += 55;
 	else
 		temp += '0';
@@ -86,15 +82,13 @@ void serial_write_hex(uint8_t v)
 }
 
 #ifndef SERIAL_NO_PRINTF
-static int serial_putchar(char c, FILE *stream)
-{
+static int serial_putchar(char c, FILE *stream) {
 	serial_write(c);
 	return 0;
 }
 #endif
 
-void serial_write(uint8_t c)
-{
+void serial_write(uint8_t c) {
 	if (SERIAL_FIFO_FULL(&tx_fifo)) {
 		return;
 	}
@@ -112,21 +106,19 @@ void serial_write(uint8_t c)
 	sei();
 }
 
-void serial_write_string(uint8_t *str)
-{
+void serial_write_string(uint8_t *str) {
 	while (str) {
 		serial_write(*str);
 		str++;
 	}
 }
 
-void serial_flush()
-{
-	while (tx_sending);
+void serial_flush() {
+	while (tx_sending)
+		;
 }
 
-int serial_read(void)
-{
+int serial_read(void) {
 	uint8_t c;
 
 	if (SERIAL_FIFO_EMPTY(&rx_fifo)) {
@@ -138,13 +130,11 @@ int serial_read(void)
 	return c;
 }
 
-uint8_t serial_available()
-{
+uint8_t serial_available() {
 	return !SERIAL_FIFO_EMPTY(&rx_fifo);
 }
 
-ISR(USART_UDRE_vect)
-{
+ISR(USART_UDRE_vect) {
 	if (SERIAL_FIFO_EMPTY(&tx_fifo)) {
 		tx_sending = 0;
 		UCSR0B &= ~_BV(UDRIE0);
@@ -154,8 +144,7 @@ ISR(USART_UDRE_vect)
 	UDR0 = serial_fifo_read(&tx_fifo);
 }
 
-ISR(USART_RX_vect)
-{
+ISR(USART_RX_vect) {
 	uint8_t c;
 
 	c = UDR0;

@@ -19,7 +19,6 @@
 //  License along with this library; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -41,7 +40,6 @@ uint8_t *serialData = &tx_packet.frame[PAYLOAD_OFFSET];
 uint8_t serialMode;
 volatile int sleepCounter;
 
-
 // RFbee AT commands
 
 // Need to define the labels outside the struct :-(
@@ -60,28 +58,27 @@ static const char OF_label[] PROGMEM = "OF";
 static const char O0_label[] PROGMEM = "O0";
 static const char SL_label[] PROGMEM = "SL";
 
-static const AT_Command_t atCommands[] PROGMEM =
-{
+static const AT_Command_t atCommands[] PROGMEM = {
 // Addressing:
-	{ DA_label, CONFIG_DEST_ADDR,     3, 255, setDstAddress },                   // Destination address   (0~255)
-	{ MA_label, CONFIG_MY_ADDR,       3, 255, setMyAddress },        // My address            (0~255)
-	{ AC_label, CONFIG_ADDR_CHECK,    1, 2,   setAddressCheck },     // address check option  (0: no, 1: address check , 2: address check and 0 broadcast )
-// RF
-	{ PA_label, CONFIG_PAINDEX,       1, 7,   setPowerAmplifier },   // Power amplifier           (0: -30 , 1: -20 , 2: -15 , 3: -10 , 4: 0 , 5: 5 , 6: 7 , 7: 10 )
-	{ CF_label, CONFIG_CONFIG_ID,     1, 5,   setCCxConfig },        // select CCx configuration  (0: 915 Mhz - 76.8k, 1: 915 Mhz - 4.8k sensitivity, 2: 915 Mhz - 4.8k low current, 3: 868 Mhz - 76.8k, 4: 868 Mhz - 4.8k sensitivity, 5: 868 Mhz - 4.8k low current )
-// Serial
-	{ BD_label, CONFIG_BDINDEX,       1, 3,   changeUartBaudRate },  // Uart baudrate                    (0: 9600 , 1:19200, 2:38400 ,3:115200)
-	{ TH_label, CONFIG_TX_THRESHOLD,  2, 32,  0 },                   // TH- threshold of transmitting    (0~32) 
-	{ OF_label, CONFIG_OUTPUT_FORMAT, 1, 4,   0 },                   // Output Format                    (0: payload only, 1: source, dest, payload ,  2: payload len, source, dest, payload, rssi, lqi, 3: same as 2, but all except for payload as decimal and separated by comma's )
-// Mode 
-	{ MD_label, CONFIG_RFBEE_MODE,    1, 3,   setRFBeeMode },        // CCx Working mode                 (0:transceive , 1:transmit , 2:receive, 3:lowpower)
-	{ O0_label, 0,                    0, 0,   setSerialDataMode },   // thats o+ zero, go back to online mode
-	{ SL_label, 0,                    0, 0,   setSleepMode },        // put the rfBee to sleep
-// Diagnostics
-	{ FV_label, 0,                    0, 0,   showFirmwareVersion }, // firmware version
-	{ HV_label, 0,                    0, 0,   showHardwareVersion }, // hardware version
-// Miscelaneous
-	{ RS_label, 0,                    0, 0,   resetConfig }          // restore default settings
+		{ DA_label, CONFIG_DEST_ADDR, 3, 255, setDstAddress }, // Destination address   (0~255)
+		{ MA_label, CONFIG_MY_ADDR, 3, 255, setMyAddress }, // My address            (0~255)
+		{ AC_label, CONFIG_ADDR_CHECK, 1, 2, setAddressCheck }, // address check option  (0: no, 1: address check , 2: address check and 0 broadcast )
+		// RF
+		{ PA_label, CONFIG_PAINDEX, 1, 7, setPowerAmplifier }, // Power amplifier           (0: -30 , 1: -20 , 2: -15 , 3: -10 , 4: 0 , 5: 5 , 6: 7 , 7: 10 )
+		{ CF_label, CONFIG_CONFIG_ID, 1, 5, setCCxConfig }, // select CCx configuration  (0: 915 Mhz - 76.8k, 1: 915 Mhz - 4.8k sensitivity, 2: 915 Mhz - 4.8k low current, 3: 868 Mhz - 76.8k, 4: 868 Mhz - 4.8k sensitivity, 5: 868 Mhz - 4.8k low current )
+		// Serial
+		{ BD_label, CONFIG_BDINDEX, 1, 3, changeUartBaudRate }, // Uart baudrate                    (0: 9600 , 1:19200, 2:38400 ,3:115200)
+		{ TH_label, CONFIG_TX_THRESHOLD, 2, 32, 0 }, // TH- threshold of transmitting    (0~32)
+		{ OF_label, CONFIG_OUTPUT_FORMAT, 1, 4, 0 }, // Output Format                    (0: payload only, 1: source, dest, payload ,  2: payload len, source, dest, payload, rssi, lqi, 3: same as 2, but all except for payload as decimal and separated by comma's )
+		// Mode
+		{ MD_label, CONFIG_RFBEE_MODE, 1, 3, setRFBeeMode }, // CCx Working mode                 (0:transceive , 1:transmit , 2:receive, 3:lowpower)
+		{ O0_label, 0, 0, 0, setSerialDataMode }, // thats o+ zero, go back to online mode
+		{ SL_label, 0, 0, 0, setSleepMode },        // put the rfBee to sleep
+		// Diagnostics
+		{ FV_label, 0, 0, 0, showFirmwareVersion }, // firmware version
+		{ HV_label, 0, 0, 0, showHardwareVersion }, // hardware version
+		// Miscelaneous
+		{ RS_label, 0, 0, 0, resetConfig }          // restore default settings
 };
 
 // error codes and labels
@@ -93,34 +90,30 @@ static const char error_2[] PROGMEM = "received invalid RF data";
 static const char error_3[] PROGMEM = "RX buffer overflow";
 static const char error_4[] PROGMEM = "CRC check failed";
 
-static const char * const error_codes[] PROGMEM =
-{
-	error_0,
-	error_1,
-	error_2,
-	error_3,
-	error_4,
-};
+static const char * const error_codes[] PROGMEM = { error_0, error_1, error_2,
+		error_3, error_4, };
 
 const long baudRateTable[] PROGMEM = { 9600, 19200, 38400, 115200 };
 
-uint8_t getNumParamData(int *result, int size)
-{
+uint8_t getNumParamData(int *result, int size) {
 	// try to read a number
 	uint8_t c;
 	int value = 0;
 	uint8_t valid = 0;
 	int pos = 4; // we start to read at pos 5 as 0-1 = AT and 2-3 = CMD
 
-	if (serialData[pos] == SERIALCMDTERMINATOR )  // no data was available
+	if (serialData[pos] == SERIALCMDTERMINATOR) { // no data was available
 		return NOTHING;
+	}
 
 	while (size-- > 0) {
 		c = serialData[pos++];
-		if (c == SERIALCMDTERMINATOR)  // no more data available 
+		if (c == SERIALCMDTERMINATOR) { // no more data available
 			break;
-		if ((c < '0') || (c > '9'))     // illegal char
+		}
+		if ((c < '0') || (c > '9')) {   // illegal char
 			return ERR;
+		}
 
 		// got a digit
 		valid = 1;
@@ -136,8 +129,7 @@ uint8_t getNumParamData(int *result, int size)
 }
 
 // simple standardized setup for commands that only modify config
-int modifyConfig(uint8_t configLabel, uint8_t paramSize, uint8_t paramMaxValue)
-{
+int modifyConfig(uint8_t configLabel, uint8_t paramSize, uint8_t paramMaxValue) {
 	int param;
 
 	uint8_t result = getNumParamData(&param, paramSize);
@@ -157,8 +149,7 @@ int modifyConfig(uint8_t configLabel, uint8_t paramSize, uint8_t paramMaxValue)
 	return ERR;
 }
 
-int processSerialCmd(uint8_t size)
-{
+int processSerialCmd(uint8_t size) {
 	int result = MODIFIED;
 
 	uint8_t configItem;   // the ID used in the EEPROM
@@ -167,43 +158,46 @@ int processSerialCmd(uint8_t size)
 	AT_Command_Function_t function; // the function which does the real work on change
 
 	// read the AT
-	if (strncasecmp("AT", (char *)serialData, 2) != 0) {
+	if (strncasecmp("AT", (char *) serialData, 2) != 0) {
 		return ERR;
 	}
 
 	// read the command
-	for(int i = 0; i <= sizeof(atCommands)/sizeof(AT_Command_t); i++) {
+	for (int i = 0; i <= sizeof(atCommands) / sizeof(AT_Command_t); i++) {
 		// do we have a known command
-		if (strncasecmp_P((char *) serialData+2 , (PGM_P) pgm_read_word(&(atCommands[i].name)), 2) == 0) {
+		if (strncasecmp_P((char *) serialData + 2,
+				(PGM_P) pgm_read_word(&(atCommands[i].name)), 2) == 0) {
 			// get the data from PROGMEM
 			configItem = pgm_read_byte(&(atCommands[i].configItem));
 			paramDigits = pgm_read_byte(&(atCommands[i].paramDigits));
 			maxValue = pgm_read_byte(&(atCommands[i].maxValue));
-			function = (AT_Command_Function_t) pgm_read_word(&(atCommands[i].function));
+			function =
+					(AT_Command_Function_t) pgm_read_word(&(atCommands[i].function));
 
-			if (paramDigits > 0)
+			if (paramDigits > 0) {
 				result = modifyConfig(configItem, paramDigits, maxValue);
+			}
 
 			if (result == MODIFIED) {
 				result = OK;  // config only commands always return OK
-				if (function)
-					result = function();  // call the command function
+				if (function) {
+					result = function();    // call the command function
+				}
 			}
 
-			return(result);  // return the result of the execution of the function linked to the command
+			return (result); // return the result of the execution of the function linked to the command
 		}
 	}
 
 	return ERR;
 }
 
-void readSerialCmd()
-{
+void readSerialCmd() {
 	int result;
 	char data;
 	static uint8_t pos = 0;
 
-	while (serial_available() && (serialMode == SERIALCMDMODE)) {      //ATSL changes commandmode while there is a char waiting in the serial buffer.
+	while (serial_available() && (serialMode == SERIALCMDMODE)) { //ATSL changes commandmode while there is a char waiting in the serial buffer.
 		result = NOTHING;
 		data = serial_read();
 		serialData[pos++] = data; //serialData is our global serial buffer
@@ -216,7 +210,7 @@ void readSerialCmd()
 			pos = 0;
 		}
 		// check if we don't overrun the buffer, if so empty it
-		if (pos > BUFFLEN){
+		if (pos > BUFFLEN) {
 			result = ERR;
 			pos = 0;
 		}
@@ -228,26 +222,27 @@ void readSerialCmd()
 	}
 }
 
-void readSerialData()
-{
+void readSerialData() {
 	uint8_t len;
 	uint8_t data;
-	uint8_t fifoSize=0;
-	static uint8_t plus=0;
-	static uint8_t pos=0;
+	uint8_t fifoSize = 0;
+	static uint8_t plus = 0;
+	static uint8_t pos = 0;
 	uint8_t rfBeeMode;
 	int i;
 
 	// insert any plusses from last round
-	for(i=pos; i < plus; i++) //be careful, i should start from pos, -changed by Icing
-		serialData[i]='+';
+	for (i = pos; i < plus; i++) { //be careful, i should start from pos, -changed by Icing
+		serialData[i] = '+';
+	}
 
 	len = serial_available() + plus + pos;
-	if (len > BUFFLEN)
-		len = BUFFLEN; //only process at most BUFFLEN chars
+	if (len > BUFFLEN) {
+		len = BUFFLEN;    //only process at most BUFFLEN chars
+	}
 
 	// check how much space we have in the TX fifo
-	fifoSize = txFifoFree();// the fifoSize should be the number of bytes in TX FIFO
+	fifoSize = txFifoFree(); // the fifoSize should be the number of bytes in TX FIFO
 
 	if (fifoSize <= 0) {
 		serial_flush();
@@ -257,8 +252,9 @@ void readSerialData()
 		return;
 	}
 
-	if (len > fifoSize)
-		len = fifoSize;  // don't overflow the TX fifo
+	if (len > fifoSize) {
+		len = fifoSize;    // don't overflow the TX fifo
+	}
 
 	for (i = plus + pos; i < len; i++) {
 		data = serial_read();
@@ -266,7 +262,7 @@ void readSerialData()
 		if (data == '+') {
 			plus++;
 		} else {
-			plus=0;
+			plus = 0;
 		}
 
 		if (plus == 3) {
@@ -275,7 +271,7 @@ void readSerialData()
 			serialMode = SERIALCMDMODE;
 			ccx_strobe(CCx_SIDLE);
 			printf("ok, starting cmd mode\r\n");
-			break;  // jump out of the loop, but still send the remaining chars in the buffer 
+			break; // jump out of the loop, but still send the remaining chars in the buffer
 		}
 	}
 
@@ -285,8 +281,9 @@ void readSerialData()
 	}
 
 	// check if we have more input than the transmitThreshold, if we have just switched to commandmode send  the current buffer anyway.
-	if ((serialMode != SERIALCMDMODE)  && (len < config_get(CONFIG_TX_THRESHOLD))){
-		pos = len;  // keep the current bytes in the buffer and wait till next round.
+	if ((serialMode != SERIALCMDMODE)
+			&& (len < config_get(CONFIG_TX_THRESHOLD))) {
+		pos = len; // keep the current bytes in the buffer and wait till next round.
 		return;
 	}
 
@@ -309,17 +306,15 @@ void readSerialData()
 //  Serial.println(buffer);
 //}
 
-void writeSerialError()
-{
+void writeSerialError() {
 	char buffer[64];
 
-	strcpy_P(buffer, (char * )pgm_read_word(&(error_codes[errNo])));
+	strcpy_P(buffer, (char *) pgm_read_word(&(error_codes[errNo])));
 	printf("error: %s\r\n", buffer);
 }
 
 // read data from CCx and write it to Serial based on the selected output format
-void writeSerialData()
-{
+void writeSerialData() {
 	struct ccxPacket_t packet;
 
 	int result;
@@ -336,11 +331,11 @@ void writeSerialData()
 		return;
 	}
 
-// write to serial based on output format:
-//  0: payload only
-//  1: source, dest, payload
-//  2: payload len, source, dest, payload, rssi, lqi
-//  3: payload len, source, dest, payload,",", rssi (DEC),",",lqi (DEC)
+	// write to serial based on output format:
+	//  0: payload only
+	//  1: source, dest, payload
+	//  2: payload len, source, dest, payload, rssi, lqi
+	//  3: payload len, source, dest, payload,",", rssi (DEC),",",lqi (DEC)
 	of = config_get(CONFIG_OUTPUT_FORMAT);
 	packet.frame[packet.len] = '\0';
 
@@ -351,36 +346,41 @@ void writeSerialData()
 	if (of == 0) {
 		printf("%s", packet.frame);
 	} else if (of == 1) {
-		printf("%02x,%02x,%s\r\n", packet.frame[0], packet.frame[1], &packet.frame[2]);
+		printf("%02x,%02x,%s\r\n", packet.frame[0], packet.frame[1],
+				&packet.frame[2]);
 	} else if (of == 2) {
-		printf("%d,%02x,%02x,%s,%02x,%02x\n\r", packet.len, packet.frame[0], packet.frame[1], &packet.frame[2], packet.rssi, packet.lqi);
+		printf("%d,%02x,%02x,%s,%02x,%02x\n\r", packet.len, packet.frame[0],
+				packet.frame[1], &packet.frame[2], packet.rssi, packet.lqi);
 	} else if (of == 3) {
 		printf("%02x,%02x,%02x,", packet.len, packet.frame[0], packet.frame[1]);
-		for (i = 0; i < packet.len-2; i++)
-			printf("%02x", packet.frame[2+i]);
+		for (i = 0; i < packet.len - 2; i++) {
+			printf("%02x", packet.frame[2 + i]);
+		}
 		printf(",%d,%d\r\n", packet.rssi, packet.lqi);
 	} else if (of == 4) {
 		printf("%02x,", packet.len);
 
-		for (i = 0; i < 4; i++)
+		for (i = 0; i < 4; i++) {
 			printf("%02x", packet.frame[i]);
+		}
 		printf(",");
 
-		for (i = 4; i < 8; i++)
+		for (i = 4; i < 8; i++) {
 			printf("%02x", packet.frame[i]);
+		}
 		printf(",");
 
-		for (i = 8; i < packet.len; i++)
+		for (i = 8; i < packet.len; i++) {
 			printf("%02x", packet.frame[i]);
+		}
 
 		printf(",%d,%d\r\n", packet.rssi, packet.lqi);
-	}	else {
+	} else {
 		printf("error: unknown format\r\n");
 	}
 }
 
-int setMyAddress()
-{
+int setMyAddress() {
 	uint8_t addr;
 
 	addr = config_get(CONFIG_MY_ADDR);
@@ -389,8 +389,7 @@ int setMyAddress()
 	return OK;
 }
 
-int setDstAddress()
-{
+int setDstAddress() {
 	uint8_t addr;
 
 	addr = config_get(CONFIG_DEST_ADDR);
@@ -399,20 +398,17 @@ int setDstAddress()
 	return OK;
 }
 
-int setAddressCheck()
-{
+int setAddressCheck() {
 	ccx_write(CCx_PKTCTRL1, config_get(CONFIG_ADDR_CHECK) | 0x04);
 	return OK;
 }
 
-int setPowerAmplifier()
-{
+int setPowerAmplifier() {
 	ccx_set_pa(config_get(CONFIG_CONFIG_ID), config_get(CONFIG_PAINDEX));
 	return OK;
 }
 
-int changeUartBaudRate()
-{
+int changeUartBaudRate() {
 	printf("ok\r\n");
 	serial_flush();
 	_delay_ms(1);
@@ -420,33 +416,28 @@ int changeUartBaudRate()
 	return OK;
 }
 
-int setUartBaudRate()
-{
+int setUartBaudRate() {
 	serial_init(pgm_read_dword(&baudRateTable[config_get(CONFIG_BDINDEX)]));
 	return NOTHING;  // we already sent an ok.
 }
 
-int showFirmwareVersion()
-{
+int showFirmwareVersion() {
 	printf("%d.%d\r\n", FIRMWAREVERSION / 10, FIRMWAREVERSION % 10);
 	return OK;
 }
 
-int showHardwareVersion()
-{
+int showHardwareVersion() {
 	uint8_t hw = config_get(CONFIG_HW_VERSION);
 	printf("%d.%d\r\n", hw / 10, hw % 10);
 	return OK;
 }
 
-int resetConfig()
-{
+int resetConfig() {
 	config_reset();
 	return OK;
 }
 
-int setCCxConfig()
-{
+int setCCxConfig() {
 	// load the appropriate config table
 	uint8_t cfg = config_get(CONFIG_CONFIG_ID);
 
@@ -462,33 +453,31 @@ int setCCxConfig()
 	return OK;
 }
 
-int setSerialDataMode()
-{
+int setSerialDataMode() {
 	serialMode = SERIALDATAMODE;
 	return OK;
 }
 
-int setRFBeeMode()
-{
+int setRFBeeMode() {
 	// CCx_MCSM1 is configured to have TX and RX return to proper state on completion or timeout
 	switch (config_get(CONFIG_RFBEE_MODE)) {
 	case TRANSMIT_MODE:
 		ccx_strobe(CCx_SIDLE);
 		_delay_ms(1);
-		ccx_write(CCx_MCSM1 ,   0x00 );//TXOFF_MODE->stay in IDLE
+		ccx_write(CCx_MCSM1, 0x00); //TXOFF_MODE->stay in IDLE
 		ccx_strobe(CCx_SFTX);
 		break;
 	case RECEIVE_MODE:
 		ccx_strobe(CCx_SIDLE);
 		_delay_ms(1);
-		ccx_write(CCx_MCSM1 ,   0x0C );//RXOFF_MODE->stay in RX
+		ccx_write(CCx_MCSM1, 0x0C); //RXOFF_MODE->stay in RX
 		ccx_strobe(CCx_SFRX);
 		ccx_strobe(CCx_SRX);
 		break;
 	case TRANSCEIVE_MODE:
 		ccx_strobe(CCx_SIDLE);
 		_delay_ms(1);
-		ccx_write(CCx_MCSM1 ,   0x0F );//RXOFF_MODE and TXOFF_MODE stay in RX
+		ccx_write(CCx_MCSM1, 0x0F); //RXOFF_MODE and TXOFF_MODE stay in RX
 		ccx_strobe(CCx_SFTX);
 		ccx_strobe(CCx_SFRX);
 		ccx_strobe(CCx_SRX);
@@ -503,8 +492,7 @@ int setRFBeeMode()
 }
 
 // put the rfbee into sleep
-int setSleepMode()
-{
+int setSleepMode() {
 #ifdef DEBUG
 	printf("going to sleep\r\n");
 #endif

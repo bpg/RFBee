@@ -1,31 +1,29 @@
 /*
-  Spi.cpp - SPI library
-  Copyright (c) 2008 Cam Thompson.
-  Author: Cam Thompson, Micromega Corporation, <www.micromegacorp.com>
-  Version: December 15, 2008
+ Spi.cpp - SPI library
+ Copyright (c) 2008 Cam Thompson.
+ Author: Cam Thompson, Micromega Corporation, <www.micromegacorp.com>
+ Version: December 15, 2008
 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 #include <avr/io.h>
 
 #include "spi.h"
 
-
-void spi_init(uint8_t mode)
-{
+void spi_init(uint8_t mode) {
 	DDRB |= SCK_PIN | MOSI_PIN | SS_PIN;
 	DDRB &= ~MISO_PIN;
 
@@ -36,8 +34,7 @@ void spi_init(uint8_t mode)
 	SPI_PORT &= ~MOSI_PIN;
 }
 
-void spi_set_mode(uint8_t config)
-{
+void spi_set_mode(uint8_t config) {
 	volatile uint8_t tmp;
 
 	// enable SPI master with configuration byte specified
@@ -46,22 +43,21 @@ void spi_set_mode(uint8_t config)
 
 	tmp = SPSR;
 	tmp = SPDR;
-	(void)tmp;
+	(void) tmp;
 }
 
-uint8_t spi_transfer(uint8_t value)
-{
+uint8_t spi_transfer(uint8_t value) {
 	uint8_t x;
 
 	SPDR = value;
-	while (!(SPSR & _BV(SPIF)));
+	while (!(SPSR & _BV(SPIF)))
+		;
 	x = SPDR;
 
 	return x;
 }
 
-void spi_slave_select(uint8_t value)
-{
+void spi_slave_select(uint8_t value) {
 	if (value) {
 		SPI_PORT |= SS_PIN;
 	} else {

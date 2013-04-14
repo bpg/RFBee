@@ -19,7 +19,6 @@
 //  License along with this library; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-
 #include "globals.h"
 #include "config.h"
 
@@ -27,20 +26,15 @@
 
 #include <avr/eeprom.h>
 
-
-static uint8_t ee_read(int address)
-{
+static uint8_t ee_read(int address) {
 	return eeprom_read_byte((unsigned char *) address);
 }
 
-static void ee_write(int address, uint8_t value)
-{
+static void ee_write(int address, uint8_t value) {
 	eeprom_write_byte((unsigned char *) address, value);
 }
 
-
-void config_reset()
-{
+void config_reset() {
 	ee_write(CONFIG_RFBEE_MARKER, CONFIG_RFBEE_MARKER_VALUE);
 	ee_write(CONFIG_FW_VERSION, FIRMWAREVERSION);
 	ee_write(CONFIG_DEST_ADDR, 0);
@@ -52,28 +46,26 @@ void config_reset()
 	ee_write(CONFIG_CONFIG_ID, 0x00);
 
 	if (ee_read(CONFIG_HW_VERSION) < 11) {
-		ee_write(CONFIG_HW_VERSION, 11);  // dirty hack to ensure rfBee's without a hardware version get their hardware version set to 1.0
+		ee_write(CONFIG_HW_VERSION, 11); // dirty hack to ensure rfBee's without a hardware version get their hardware version set to 1.0
 	}
 
-	ee_write(CONFIG_OUTPUT_FORMAT, 0x00);   
-	ee_write(CONFIG_RFBEE_MODE, 0x00); 
+	ee_write(CONFIG_OUTPUT_FORMAT, 0x00);
+	ee_write(CONFIG_RFBEE_MODE, 0x00);
 }
 
-uint8_t config_get(uint8_t idx)
-{
-  return (ee_read(idx));
+uint8_t config_get(uint8_t idx) {
+	return (ee_read(idx));
 }
 
-void config_set(uint8_t idx, uint8_t value)
-{
-  ee_write(idx,value);
+void config_set(uint8_t idx, uint8_t value) {
+	ee_write(idx, value);
 }
 
-int config_initialized()
-{
-	if ((ee_read(CONFIG_RFBEE_MARKER) == CONFIG_RFBEE_MARKER_VALUE) && (ee_read(CONFIG_FW_VERSION) == FIRMWAREVERSION)) {
+int config_initialized() {
+	if ((ee_read(CONFIG_RFBEE_MARKER) == CONFIG_RFBEE_MARKER_VALUE)
+			&& (ee_read(CONFIG_FW_VERSION) == FIRMWAREVERSION)) {
 		return OK;
 	}
 
-	return ERR; 
+	return ERR;
 }

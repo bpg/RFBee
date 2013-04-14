@@ -7,8 +7,7 @@
 #include "hardware.h"
 
 enum {
-	LOW = 0,
-	HIGH = 1,
+	LOW = 0, HIGH = 1,
 };
 
 void spi_init(uint8_t mode);

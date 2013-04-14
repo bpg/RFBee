@@ -1,3 +1,8 @@
 *.o
 *.hex
 *.elf
+.cproject
+.project
+.settings
+bin
+obj

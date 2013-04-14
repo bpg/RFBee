@@ -1,4 +1,4 @@
-//  Firmware for rfBee 
+//  Firmware for rfBee
 //  see www.seeedstudio.com for details and ordering rfBee hardware.
 
 //  Copyright (c) 2010 Hans Klunder <hans.klunder (at) bigfoot.com>
@@ -8,15 +8,16 @@
 //  This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License
 //  as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
 //
-//  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+//  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
 //  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 //  See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with this program; 
+//  You should have received a copy of the GNU General Public License along with this program;
 //  if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 #include <stdio.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 
 #include "hardware.h"
 
@@ -30,13 +31,11 @@
 #include "TestIO.h"  // factory selftest
 #endif
 
-
 #undef DEBUG
 
 static void rfBeeInit();
 
-static void setup()
-{
+static void setup() {
 	sei();
 
 	if (config_initialized() != OK) {
@@ -44,18 +43,25 @@ static void setup()
 		printf("Initializing config\r\n");
 #ifdef FACTORY_SELFTEST
 		if ( TestIO() != OK )
-			return;
-#endif 
+		return;
+#endif
 		config_reset();
 	}
 
 	setUartBaudRate();
 	rfBeeInit();
+
+	DDRC &= ~(_BV(7));
+	PORTC |= _BV(7);
+
+	// set DHT pin as input
+//	DDRD &= ~(_BV(5));
+//	PORTD |= _BV(5);
+
 	printf("ok\r\n");
 }
 
-static void loop()
-{
+static void loop() {
 	if (serial_available() > 0) {
 #ifdef DEBUG
 		printf("Sdat\r\n");
@@ -79,7 +85,8 @@ static void loop()
 	sleepCounter--;
 
 	// check if we can go to sleep again, going into low power too early will result in lost data in the CCx fifo.
-	if ((sleepCounter == 0) && (config_get(CONFIG_RFBEE_MODE) == LOWPOWER_MODE)) {
+	if ((sleepCounter == 0)
+			&& (config_get(CONFIG_RFBEE_MODE) == LOWPOWER_MODE)) {
 #ifdef DEBUG
 		printf("low power on\r\n");
 #endif
@@ -90,9 +97,7 @@ static void loop()
 	}
 }
 
-
-static void rfBeeInit()
-{
+static void rfBeeInit() {
 	// used for polling the RF received data
 	GDO_DDR &= ~(GDO0 | GDO2);
 	GDO_PORT &= ~(GDO0 | GDO2);
@@ -109,16 +114,14 @@ static void rfBeeInit()
 }
 
 //GD00 is located on INT 0
-ISR(INT0_vect)
-{
+ISR(INT0_vect) {
 	sleepCounter = 10;
 }
 
-int main(void)
-{
+int main(void) {
 	setup();
-    
-	while(1) {
+
+	while (1) {
 		loop();
 	}
 	return 0;

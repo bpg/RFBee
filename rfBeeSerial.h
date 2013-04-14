@@ -19,7 +19,6 @@
 //  License along with this library; if not, write to the Free Software
 //  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-
 #ifndef RFBEESERIAL_H
 #define RFBEESERIAL_H 1
 
@@ -32,20 +31,18 @@
 #define SERIALCMDMODE 1
 #define SERIALDATAMODE 0
 #define SERIALCMDTERMINATOR 13  // use <CR> to terminate commands
-
 // Supported commands, Commands and parameters in ASCII
 // Example: ATDA14 means: change the RF module Destination Address to 14
 
-typedef int (*AT_Command_Function_t)(); 
+typedef int (*AT_Command_Function_t)();
 
-typedef struct
-{
-  const char *name;
-  const uint8_t configItem;   // the ID used in the EEPROM
-  const uint8_t paramDigits;  // how many digits for the parameter
-  const uint8_t maxValue;     // maximum value of the parameter
-  AT_Command_Function_t function; // the function which does the real work on change
-}  AT_Command_t;
+typedef struct {
+	const char *name;
+	const uint8_t configItem;   // the ID used in the EEPROM
+	const uint8_t paramDigits;  // how many digits for the parameter
+	const uint8_t maxValue;     // maximum value of the parameter
+	AT_Command_Function_t function; // the function which does the real work on change
+} AT_Command_t;
 
 extern uint8_t errNo;
 //extern uint8_t serialData[BUFFLEN+1]; // 1 extra so we can easily add a /0 when doing a debug print ;-)
@@ -55,14 +52,13 @@ extern volatile int sleepCounter;
 // operating modes, used by ATMD
 
 #define TRANSCEIVE_MODE 0
-#define TRANSMIT_MODE 1     
-#define RECEIVE_MODE 2 
+#define TRANSMIT_MODE 1
+#define RECEIVE_MODE 2
 #define LOWPOWER_MODE 3
 
 #ifdef INTERRUPT_RECEIVE
 volatile enum state
 #endif
-
 
 uint8_t getNumParamData(int *result, int size);
 int modifyConfig(uint8_t configLabel, uint8_t paramSize, uint8_t paramMaxValue);

@@ -26,7 +26,6 @@
 
 #include "hardware.h"
 
-
 #define CCx_PA_TABLESIZE 8
 
 // CC2500/CC1100/CC1101 STROBE, CONTROL AND STATUS REGISTER
@@ -77,22 +76,21 @@
 #define CCx_TEST2        0x2C        // Various test settings
 #define CCx_TEST1        0x2D        // Various test settings
 #define CCx_TEST0        0x2E        // Various test settings
-
 // Strobe commands
 #define CCx_SRES         0x30        // Reset chip.
 #define CCx_SFSTXON      0x31        // Enable and calibrate frequency synthesizer (if MCSM0.FS_AUTOCAL=1).
-                                        // If in RX/TX: Go to a wait state where only the synthesizer is
-                                        // running (for quick RX / TX turnaround).
+// If in RX/TX: Go to a wait state where only the synthesizer is
+// running (for quick RX / TX turnaround).
 #define CCx_SXOFF        0x32        // Turn off crystal oscillator.
 #define CCx_SCAL         0x33        // Calibrate frequency synthesizer and turn it off
-                                        // (enables quick start).
+// (enables quick start).
 #define CCx_SRX          0x34        // Enable RX. Perform calibration first if coming from IDLE and
-                                        // MCSM0.FS_AUTOCAL=1.
+// MCSM0.FS_AUTOCAL=1.
 #define CCx_STX          0x35        // In IDLE state: Enable TX. Perform calibration first if
-                                        // MCSM0.FS_AUTOCAL=1. If in RX state and CCA is enabled:
-                                        // Only go to TX if channel is clear.
+// MCSM0.FS_AUTOCAL=1. If in RX state and CCA is enabled:
+// Only go to TX if channel is clear.
 #define CCx_SIDLE        0x36        // Exit RX / TX, turn off frequency synthesizer and exit
-                                        // Wake-On-Radio mode if applicable.
+// Wake-On-Radio mode if applicable.
 #define CCx_SAFC         0x37        // Perform AFC adjustment of the frequency synthesizer
 #define CCx_SWOR         0x38        // Start automatic RX polling sequence (Wake-on-Radio)
 #define CCx_SPWD         0x39        // Enter power down mode when CSn goes high.
@@ -100,7 +98,7 @@
 #define CCx_SFTX         0x3B        // Flush the TX FIFO buffer.
 #define CCx_SWORRST      0x3C        // Reset real time clock.
 #define CCx_SNOP         0x3D        // No operation. May be used to pad strobe commands to two
-                                        // bytes for simpler software.
+// bytes for simpler software.
 // Status registers (read & burst)
 #define CCx_PARTNUM      (0x30 | 0xc0)
 #define CCx_VERSION      (0x31 | 0xc0)
@@ -120,12 +118,10 @@
 #define CCx_RXFIFO       0x3F
 
 #define CCx_FIFO_SIZE    0x40 // 64 bytes
-
 #define CCx_PACKT_LEN   (CCx_FIFO_SIZE - 3) // see section 15.3 of the datasheet
-
 struct ccxPacket_t {
 	uint8_t len;
-	uint8_t frame[CCx_PACKT_LEN+1];
+	uint8_t frame[CCx_PACKT_LEN + 1];
 	union {
 		uint8_t metrics[2];
 		struct {
@@ -133,7 +129,7 @@ struct ccxPacket_t {
 			uint8_t lqi;
 		};
 	};
-} __attribute__ ((packed));
+}__attribute__ ((packed));
 
 void ccx_power_on_startup();
 uint8_t ccx_read(uint8_t addr, uint8_t *data);
@@ -143,7 +139,7 @@ uint8_t ccx_write_burst(uint8_t addr, const uint8_t* dataPtr, uint8_t size);
 uint8_t ccx_strobe(uint8_t addr);
 void ccx_setup(uint8_t configId);
 void ccx_read_setup();
-void ccx_set_pa(uint8_t configId,uint8_t paIndex);
+void ccx_set_pa(uint8_t configId, uint8_t paIndex);
 void ccx_idle();
 void ccx_mode(uint8_t md);
 uint8_t ccx_get_config_num();

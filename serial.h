@@ -3,10 +3,8 @@
 
 #include <avr/io.h>
 
-
 // 19200 @ 8mhz 
 #define	BRREG_VALUE	25
-
 
 void serial_init(uint32_t baud);
 void serial_set_baudrate(uint32_t baud);

@@ -28,12 +28,11 @@
 
 // send data via RF
 //void transmitData(uint8_t *txData, uint8_t len, uint8_t srcAddress, uint8_t destAddress)
-void transmitData(struct ccxPacket_t *packet)
-{
+void transmitData(struct ccxPacket_t *packet) {
 	uint8_t stat;
 	uint8_t size;
 
-	(void)stat;
+	(void) stat;
 
 	// disable RX mode
 	ccx_idle();
@@ -52,19 +51,21 @@ void transmitData(struct ccxPacket_t *packet)
 #endif
 
 	// write packet (len + data)
-	ccx_write_burst(CCx_TXFIFO, (uint8_t *)packet, packet->len + 1);
+	ccx_write_burst(CCx_TXFIFO, (uint8_t *) packet, packet->len + 1);
 
 	// send packet
 	ccx_strobe(CCx_STX);
 
 	// wait for SYNC transmission
-	wait_GDO2_high();
+	wait_GDO2_high()
+	;
 #ifdef DEBUG
 	printf("sync\n\r");
 #endif
 
 	// wait for packet completion
-	wait_GDO2_low();
+	wait_GDO2_low()
+	;
 #ifdef DEBUG
 	printf("sent\n\r");
 #endif
@@ -75,23 +76,23 @@ void transmitData(struct ccxPacket_t *packet)
 
 #ifdef DEBUG
 	packet->frame[packet->len] = '\0';
-	for (int i = 0; i < packet->len; i++)
+	for (int i = 0; i < packet->len; i++) {
 		printf("%02x", packet->frame[i]);
+	}
 #endif
 }
 
 // read available txFifo size and handle underflow (which should not have occured anyway)
-uint8_t txFifoFree()
-{
+uint8_t txFifoFree() {
 	uint8_t stat;
 	uint8_t size;
 
-	(void)stat;
+	(void) stat;
 
 	stat = ccx_read(CCx_TXBYTES, &size);
 
 	// handle a potential TX underflow by flushing the TX FIFO as described in section 10.1 of the CC 1100 datasheet
-	if (size & 0x80) {//state got here seems not right, so using size to make sure it no more than 64
+	if (size & 0x80) { //state got here seems not right, so using size to make sure it no more than 64
 		ccx_strobe(CCx_SFTX);
 		stat = ccx_read(CCx_TXBYTES, &size);
 #ifdef DEBUG
@@ -106,8 +107,7 @@ uint8_t txFifoFree()
 }
 
 // receive data via RF, rxData must be at least CCx_PACKT_LEN bytes long
-int receiveData(struct ccxPacket_t *packet)
-{
+int receiveData(struct ccxPacket_t *packet) {
 	uint8_t fifo_len;
 
 	uint8_t rx_bytes;
@@ -156,8 +156,7 @@ int receiveData(struct ccxPacket_t *packet)
 }
 
 // power saving
-void sleepNow(uint8_t mode)
-{
+void sleepNow(uint8_t mode) {
 	/* Now is the time to set the sleep mode. In the Atmega8 datasheet
 	 * http://www.atmel.com/dyn/resources/prod_documents/doc2486.pdf on page 35
 	 * there is a list of sleep modes which explains which clocks and
@@ -177,8 +176,9 @@ void sleepNow(uint8_t mode)
 	 */
 	set_sleep_mode(mode);   // sleep mode is set here
 
-	sleep_enable();          // enables the sleep bit in the mcucr register
-	// so sleep is possible. just a safety pin 
+	sleep_enable()
+	;          // enables the sleep bit in the mcucr register
+	// so sleep is possible. just a safety pin
 
 	power_adc_disable();
 	power_spi_disable();
@@ -187,18 +187,19 @@ void sleepNow(uint8_t mode)
 	power_timer2_disable();
 	power_twi_disable();
 
-	sleep_mode();            // here the device is actually put to sleep!!
+	sleep_mode()
+	;            // here the device is actually put to sleep!!
 
 	// THE PROGRAM CONTINUES FROM HERE AFTER WAKING UP
-	sleep_disable();         // first thing after waking from sleep:
+	sleep_disable()
+	;         // first thing after waking from sleep:
 	// disable sleep...
 
 	power_all_enable();
 }
 
-void lowPowerOn()
-{
-	ccx_write(CCx_WORCTRL, 0x78);  // set WORCRTL.RC_PD to 0 to enable the wakeup oscillator
+void lowPowerOn() {
+	ccx_write(CCx_WORCTRL, 0x78); // set WORCRTL.RC_PD to 0 to enable the wakeup oscillator
 	ccx_strobe(CCx_SWOR);
 
 	sleepNow(SLEEP_MODE_IDLE);
